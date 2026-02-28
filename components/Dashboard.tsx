@@ -60,12 +60,12 @@ export default function Dashboard() {
   
   // Calculate category distribution
   const categoryDistribution = initialCategories.map(cat => {
-    const count = initialMedicines.filter(m => m.category === cat.name).length;
+    const count = initialMedicines.filter(m => m.category === cat.name && !m.isHeader).length;
     // Assign a color based on index or predefined list
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
     const color = colors[cat.id % colors.length];
     return { name: cat.name, count, color };
-  }).sort((a, b) => b.count - a.count).slice(0, 5); // Top 5 categories
+  }).sort((a, b) => b.count - a.count); // Show all categories, sorted by count
 
   const maxCategoryCount = Math.max(...categoryDistribution.map(c => c.count), 1);
 
@@ -133,9 +133,9 @@ export default function Dashboard() {
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <h3 className="font-bold text-slate-800 mb-6">Phân bổ theo nhóm (Thực tế)</h3>
-          <div className="space-y-4">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col max-h-[400px]">
+          <h3 className="font-bold text-slate-800 mb-6 shrink-0">Phân bổ theo nhóm (Thực tế)</h3>
+          <div className="space-y-4 overflow-y-auto pr-2 flex-1">
             {categoryDistribution.map((cat, i) => (
               <div key={i} className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -146,7 +146,7 @@ export default function Dashboard() {
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${(cat.count / maxCategoryCount) * 100}%` }}
-                    transition={{ duration: 1, delay: i * 0.1 }}
+                    transition={{ duration: 1, delay: i * 0.05 }}
                     className="h-full rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
@@ -154,9 +154,6 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <button className="w-full mt-8 py-3 text-sm font-medium text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-            Xem tất cả nhóm <ChevronRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
