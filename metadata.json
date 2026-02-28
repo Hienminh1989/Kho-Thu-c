@@ -1,0 +1,8 @@
+{
+  "name": "Kho Thuốc - Hệ thống quản lý dược phẩm",
+  "description": "Hệ thống quản lý danh mục thuốc nội bộ bệnh viện chuyên nghiệp, tối ưu tra cứu và quản lý dược phẩm.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

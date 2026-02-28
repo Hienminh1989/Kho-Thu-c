@@ -1,0 +1,32 @@
+import type { Metadata } from 'next';
+import { Inter, Playfair_Display } from 'next/font/google';
+import './globals.css';
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  variable: '--font-serif',
+});
+
+export const metadata: Metadata = {
+  title: 'Kho Thuốc | Hệ thống quản lý dược phẩm',
+  description: 'Hệ thống quản lý danh mục thuốc nội bộ',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="vi" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="bg-slate-50 text-slate-900 antialiased font-sans" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}
