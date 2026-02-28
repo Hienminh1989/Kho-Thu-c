@@ -24,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-slate-50 text-slate-900 antialiased font-sans" suppressHydrationWarning>
+      <body className="bg-[#FCFAF7] text-[#1A1A1A] antialiased font-sans" suppressHydrationWarning>
         {children}
       </body>
     </html>

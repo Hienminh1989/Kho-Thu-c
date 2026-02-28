@@ -9,6 +9,8 @@ import SystemLogs from '@/components/SystemLogs';
 import UserList from '@/components/UserList';
 import Login from '@/components/Login';
 import LandingPage from '@/components/LandingPage';
+import NationalDatabaseSearch from '@/components/NationalDatabaseSearch';
+import Settings from '@/components/Settings';
 import { Bell, Search, HelpCircle } from 'lucide-react';
 
 export default function Home() {
@@ -48,8 +50,10 @@ export default function Home() {
               {activeTab === 'dashboard' ? 'Tổng quan hệ thống' : 
                activeTab === 'medicines' ? 'Quản lý danh mục thuốc' : 
                activeTab === 'categories' ? 'Quản lý nhóm thuốc' : 
+               activeTab === 'national-db' ? 'CSDL Dược Quốc gia' : 
                activeTab === 'logs' ? 'Nhật ký hệ thống' : 
-               activeTab === 'users' ? 'Quản lý người dùng' : 'Hệ thống'}
+               activeTab === 'users' ? 'Quản lý người dùng' : 
+               activeTab === 'settings' ? 'Cài đặt hệ thống' : 'Hệ thống'}
             </h2>
           </div>
 
@@ -70,8 +74,10 @@ export default function Home() {
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'medicines' && <MedicineList />}
           {activeTab === 'categories' && <CategoryList />}
+          {activeTab === 'national-db' && <NationalDatabaseSearch />}
           {activeTab === 'logs' && <SystemLogs />}
           {activeTab === 'users' && <UserList />}
+          {activeTab === 'settings' && <Settings />}
         </div>
       </main>
     </div>

@@ -10,7 +10,8 @@ import {
   Settings, 
   Users, 
   LogOut,
-  Stethoscope
+  Stethoscope,
+  Database
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'editor', 'viewer'] },
   { id: 'medicines', label: 'Danh mục thuốc', icon: Pill, roles: ['admin', 'editor', 'viewer'] },
   { id: 'categories', label: 'Nhóm thuốc', icon: Layers, roles: ['admin', 'editor'] },
+  { id: 'national-db', label: 'CSDL Quốc gia', icon: Database, roles: ['admin', 'editor', 'viewer'] },
   { id: 'logs', label: 'Nhật ký hệ thống', icon: History, roles: ['admin'] },
   { id: 'users', label: 'Người dùng', icon: Users, roles: ['admin'] },
 ];
@@ -89,8 +91,16 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
             Đăng xuất
           </button>
         </div>
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all">
-          <Settings className="w-5 h-5 text-slate-400" />
+        <button 
+          onClick={() => setActiveTab('settings')}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+            activeTab === 'settings' 
+              ? "bg-blue-600 text-white shadow-lg shadow-blue-100" 
+              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+          )}
+        >
+          <Settings className={cn("w-5 h-5", activeTab === 'settings' ? "text-white" : "text-slate-400")} />
           Cài đặt hệ thống
         </button>
       </div>

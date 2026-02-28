@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Pill, ArrowRight, Search, Layers, Info, X,
   Sparkles, FileText, AlertCircle, CheckCircle2, ArrowUpRight,
-  Stethoscope, ShieldCheck, Activity
+  Stethoscope, ShieldCheck, Activity, Loader2, Database, Building2, Globe
 } from 'lucide-react';
 import Image from 'next/image';
 import { initialMedicines, initialCategories } from '@/lib/data';
@@ -21,6 +21,13 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
   const [selectedMedicine, setSelectedMedicine] = useState<any>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  const [searchSource, setSearchSource] = useState<'local' | 'national'>('local');
+  const [nationalResults, setNationalResults] = useState<any[]>([]);
+  const [nationalSuggestions, setNationalSuggestions] = useState<any[]>([]);
+  const [isSearchingNational, setIsSearchingNational] = useState(false);
+  const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
+  const [hasSearchedNational, setHasSearchedNational] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -28,8 +35,58 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (searchSource === 'national' && searchTerm.trim().length > 1) {
+      const delayDebounceFn = setTimeout(async () => {
+        setIsFetchingSuggestions(true);
+        try {
+          const res = await fetch(`/api/national-db?q=${encodeURIComponent(searchTerm)}&type=name`);
+          const data = await res.json();
+          if (data.success) {
+            setNationalSuggestions(data.data.slice(0, 5));
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsFetchingSuggestions(false);
+        }
+      }, 500);
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setNationalSuggestions([]);
+    }
+  }, [searchTerm, searchSource]);
+
   const handleRegister = () => {
     alert('Tính năng đăng ký đang được phát triển. Vui lòng quay lại sau!');
+  };
+
+  const executeNationalSearch = async (term: string) => {
+    setIsSearchingNational(true);
+    setHasSearchedNational(true);
+    try {
+      const res = await fetch(`/api/national-db?q=${encodeURIComponent(term)}&type=name`);
+      const data = await res.json();
+      if (data.success) {
+        setNationalResults(data.data);
+        document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSearchingNational(false);
+    }
+  };
+
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    
+    if (searchSource === 'national') {
+      await executeNationalSearch(searchTerm);
+    } else {
+      document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const filteredMedicines = initialMedicines.filter(med => {
@@ -115,27 +172,46 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
               </p>
 
               {/* Search Bar */}
-              <div className={`relative max-w-xl transition-all duration-300 ${isSearchFocused ? 'scale-[1.02]' : ''}`}>
-                <div className="relative flex items-center bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 p-2">
-                  <div className="pl-4 pr-3">
-                    <Search className={`w-6 h-6 transition-colors ${isSearchFocused ? 'text-blue-600' : 'text-slate-400'}`} />
+              <div className={`relative max-w-2xl transition-all duration-300 ${isSearchFocused ? 'scale-[1.02]' : ''}`}>
+                <form onSubmit={handleSearchSubmit} className="relative flex flex-col sm:flex-row items-center bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 p-2 gap-2 z-20">
+                  <div className="flex items-center w-full sm:w-auto px-3 border-b sm:border-b-0 sm:border-r border-slate-200 pb-2 sm:pb-0">
+                    <Database className="w-4 h-4 text-blue-600 mr-2" />
+                    <select 
+                      value={searchSource} 
+                      onChange={(e) => {
+                        setSearchSource(e.target.value as 'local' | 'national');
+                        setNationalResults([]);
+                        setHasSearchedNational(false);
+                      }}
+                      className="bg-transparent text-sm font-bold text-slate-700 outline-none cursor-pointer w-full py-2"
+                    >
+                      <option value="local">Kho nội bộ</option>
+                      <option value="national">CSDL Quốc gia</option>
+                    </select>
                   </div>
-                  <input 
-                    type="text"
-                    placeholder="Tìm tên thuốc, hoạt chất, mã ICD..."
-                    className="flex-1 py-4 bg-transparent text-lg font-medium outline-none placeholder:text-slate-400"
-                    value={searchTerm}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setSelectedCategory(null);
-                    }}
-                  />
-                  <button className="bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-600/20">
-                    <ArrowRight className="w-5 h-5" />
+                  <div className="flex-1 flex items-center w-full">
+                    <div className="pl-3 pr-2">
+                      <Search className={`w-5 h-5 transition-colors ${isSearchFocused ? 'text-blue-600' : 'text-slate-400'}`} />
+                    </div>
+                    <input 
+                      type="text"
+                      placeholder={searchSource === 'local' ? "Tìm tên thuốc, hoạt chất..." : "Tra cứu CSDL Dược Quốc gia..."}
+                      className="flex-1 py-3 bg-transparent text-base font-medium outline-none placeholder:text-slate-400 w-full"
+                      value={searchTerm}
+                      onFocus={() => setIsSearchFocused(true)}
+                      onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setSelectedCategory(null);
+                        if (searchSource === 'national') setHasSearchedNational(false);
+                      }}
+                    />
+                  </div>
+                  <button type="submit" disabled={isSearchingNational} className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-70">
+                    {isSearchingNational ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                    <span className="sm:hidden font-bold">Tìm kiếm</span>
                   </button>
-                </div>
+                </form>
 
                 {/* Search Suggestions */}
                 <AnimatePresence>
@@ -147,28 +223,65 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
                       className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
                     >
                       <div className="max-h-[350px] overflow-y-auto p-2">
-                        {filteredMedicines.slice(0, 5).map((med) => (
-                          <div
-                            key={med.id}
-                            onClick={() => {
-                              setSelectedMedicine(med);
-                              setIsSearchFocused(false);
-                            }}
-                            className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors"
-                          >
-                            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 shrink-0">
-                              <Pill className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <h4 className="text-slate-900 font-bold">{med.name}</h4>
-                              <p className="text-slate-500 text-xs">{med.generic}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {filteredMedicines.length === 0 && (
-                          <div className="p-6 text-center text-slate-500 text-sm">
-                            Không tìm thấy kết quả phù hợp
-                          </div>
+                        {searchSource === 'local' ? (
+                          <>
+                            {filteredMedicines.slice(0, 5).map((med) => (
+                              <div
+                                key={med.id}
+                                onClick={() => {
+                                  setSelectedMedicine(med);
+                                  setIsSearchFocused(false);
+                                }}
+                                className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors"
+                              >
+                                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 shrink-0">
+                                  <Pill className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <h4 className="text-slate-900 font-bold">{med.name}</h4>
+                                  <p className="text-slate-500 text-xs">{med.generic}</p>
+                                </div>
+                              </div>
+                            ))}
+                            {filteredMedicines.length === 0 && (
+                              <div className="p-6 text-center text-slate-500 text-sm">
+                                Không tìm thấy kết quả phù hợp
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {isFetchingSuggestions ? (
+                              <div className="p-6 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                                Đang tìm kiếm trên CSDL Quốc gia...
+                              </div>
+                            ) : nationalSuggestions.length > 0 ? (
+                              nationalSuggestions.map((med) => (
+                                <div
+                                  key={med.id}
+                                  onClick={() => {
+                                    setSearchTerm(med.name);
+                                    setIsSearchFocused(false);
+                                    executeNationalSearch(med.name);
+                                  }}
+                                  className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors"
+                                >
+                                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 shrink-0">
+                                    <Database className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-slate-900 font-bold">{med.name}</h4>
+                                    <p className="text-slate-500 text-xs">{med.activeIngredient} • {med.registrationNo}</p>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-6 text-center text-slate-500 text-sm">
+                                Không tìm thấy kết quả trên CSDL Quốc gia
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </motion.div>
@@ -272,7 +385,7 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
                   <div className={`px-3 py-1 rounded-full text-xs font-bold ${
                     selectedCategory === cat.name ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
                   }`}>
-                    {cat.count} sản phẩm
+                    {initialMedicines.filter(m => m.category === cat.name && !m.isHeader).length} sản phẩm
                   </div>
                 </div>
               </motion.div>
@@ -287,32 +400,113 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900 mb-2">
-                {selectedCategory ? `Nhóm: ${selectedCategory}` : searchTerm ? `Kết quả cho "${searchTerm}"` : 'Tất cả sản phẩm'}
+                {searchSource === 'national' 
+                  ? 'Kết quả từ CSDL Quốc gia' 
+                  : selectedCategory 
+                    ? `Nhóm: ${selectedCategory}` 
+                    : searchTerm 
+                      ? `Kết quả cho "${searchTerm}"` 
+                      : 'Tất cả sản phẩm'}
               </h2>
-              <p className="text-slate-600">Tìm thấy {filteredMedicines.length} kết quả phù hợp.</p>
+              <p className="text-slate-600">
+                {searchSource === 'national' 
+                  ? (hasSearchedNational ? `Tìm thấy ${nationalResults.length} kết quả trên hệ thống quốc gia.` : 'Nhập từ khóa và nhấn Tìm kiếm để tra cứu.')
+                  : `Tìm thấy ${filteredMedicines.length} kết quả phù hợp trong kho nội bộ.`}
+              </p>
             </div>
             
             {/* Contextual Search */}
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input 
-                type="text"
-                placeholder="Lọc kết quả..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
-              {searchTerm && (
-                <button 
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
+            {searchSource === 'local' && (
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input 
+                  type="text"
+                  placeholder="Lọc kết quả..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
+          {searchSource === 'national' ? (
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              {isSearchingNational ? (
+                <div className="p-20 flex flex-col items-center justify-center text-slate-400">
+                  <Loader2 className="w-10 h-10 animate-spin mb-4 text-blue-600" />
+                  <p>Đang kết nối CSDL Quốc gia...</p>
+                </div>
+              ) : hasSearchedNational && nationalResults.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                        <th className="p-4 font-bold border-b border-slate-100">Số đăng ký</th>
+                        <th className="p-4 font-bold border-b border-slate-100">Tên thuốc / Hoạt chất</th>
+                        <th className="p-4 font-bold border-b border-slate-100">Dạng bào chế</th>
+                        <th className="p-4 font-bold border-b border-slate-100">Sản xuất</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {nationalResults.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                              <FileText className="w-3.5 h-3.5" />
+                              {item.registrationNo}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-slate-900 mb-1">{item.name}</div>
+                            <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                              <Pill className="w-3.5 h-3.5" />
+                              {item.activeIngredient}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-slate-700">{item.dosageForm}</div>
+                            <div className="text-xs text-slate-500 mt-1">{item.packaging}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-slate-700 flex items-center gap-1.5 mb-1">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="line-clamp-1">{item.manufacturer}</span>
+                            </div>
+                            <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5 text-slate-400" />
+                              {item.country}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : hasSearchedNational ? (
+                <div className="p-20 flex flex-col items-center justify-center text-slate-500">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                    <Database className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <p className="text-lg font-medium text-slate-900 mb-1">Không tìm thấy dữ liệu</p>
+                  <p className="text-sm">Không có bản ghi nào khớp với thông tin tìm kiếm trên CSDL Quốc gia.</p>
+                </div>
+              ) : (
+                <div className="p-20 flex flex-col items-center justify-center text-slate-500">
+                  <Database className="w-12 h-12 text-slate-200 mb-4" />
+                  <p>Nhập từ khóa và nhấn Tìm kiếm để tra cứu CSDL Quốc gia.</p>
+                </div>
+              )}
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence mode="popLayout">
               {filteredMedicines.length > 0 ? (
@@ -383,6 +577,7 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
               )}
             </AnimatePresence>
           </div>
+          )}
         </div>
       </section>
 
