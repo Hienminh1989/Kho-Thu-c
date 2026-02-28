@@ -36,12 +36,17 @@ const HighlightText = ({ text, highlight }: { text: string, highlight: string })
   if (!highlight.trim()) {
     return <span>{text}</span>;
   }
-  const regex = new RegExp(`(${highlight})`, 'gi');
+  const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedHighlight})`, 'gi');
   const parts = text.split(regex);
   return (
     <span>
       {parts.map((part, i) => 
-        regex.test(part) ? <span key={i} className="bg-yellow-200 font-bold text-slate-900 px-0.5 rounded">{part}</span> : <span key={i}>{part}</span>
+        part.toLowerCase() === highlight.toLowerCase() ? (
+          <span key={i} className="bg-yellow-200 font-bold text-slate-900 px-0.5 rounded">{part}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
       )}
     </span>
   );
