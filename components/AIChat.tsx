@@ -11,7 +11,7 @@ export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'ai' | 'zalo'>('ai');
   const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
-    { role: 'model', text: 'Xin chào! Tôi là trợ lý AI của Medicat Pro. Tôi có thể giúp gì cho bạn về thông tin thuốc?' }
+    { role: 'model', text: 'Xin chào! Tôi là trợ lý AI của Tra cứu Thuốc Bệnh Viện Thiệu Hóa. Tôi có thể giúp gì cho bạn về thông tin thuốc?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function AIChat() {
         model: "gemini-3-flash-preview",
         contents: userMessage,
         config: {
-          systemInstruction: "Bạn là một dược sĩ ảo chuyên nghiệp của hệ thống Medicat Pro. Hãy trả lời các câu hỏi về thuốc một cách chính xác, ngắn gọn và luôn khuyên người dùng tham khảo ý kiến bác sĩ trước khi sử dụng. Nếu câu hỏi không liên quan đến y tế hoặc thuốc, hãy khéo léo từ chối.",
+          systemInstruction: "Bạn là một dược sĩ ảo chuyên nghiệp của hệ thống Tra cứu Thuốc Bệnh Viện Thiệu Hóa. Hãy trả lời các câu hỏi về thuốc một cách chính xác, ngắn gọn và luôn khuyên người dùng tham khảo ý kiến bác sĩ trước khi sử dụng. Nếu câu hỏi không liên quan đến y tế hoặc thuốc, hãy khéo léo từ chối.",
         },
       });
 
@@ -73,7 +73,7 @@ export default function AIChat() {
                     {activeTab === 'ai' ? <Bot className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm">{activeTab === 'ai' ? 'Trợ lý Medicat AI' : 'Hỗ trợ Zalo Khoa Dược'}</h3>
+                    <h3 className="font-bold text-sm">{activeTab === 'ai' ? 'Trợ lý AI' : 'Hỗ trợ Zalo Khoa Dược'}</h3>
                     <div className="flex items-center gap-1">
                       <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                       <span className="text-[10px] opacity-80">Đang trực tuyến</span>

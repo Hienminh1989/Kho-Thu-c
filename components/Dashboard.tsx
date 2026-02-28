@@ -27,6 +27,7 @@ import {
   Bar,
   Cell
 } from 'recharts';
+import { initialMedicines, initialCategories } from '@/lib/data';
 
 // Mock Data
 const statsData = [
@@ -53,13 +54,28 @@ const recentLogs = [
 ];
 
 export default function Dashboard() {
+  // Calculate real stats
+  const totalMedicines = initialMedicines.length;
+  const totalCategories = initialCategories.length;
+  
+  // Calculate category distribution
+  const categoryDistribution = initialCategories.map(cat => {
+    const count = initialMedicines.filter(m => m.category === cat.name).length;
+    // Assign a color based on index or predefined list
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+    const color = colors[cat.id % colors.length];
+    return { name: cat.name, count, color };
+  }).sort((a, b) => b.count - a.count).slice(0, 5); // Top 5 categories
+
+  const maxCategoryCount = Math.max(...categoryDistribution.map(c => c.count), 1);
+
   return (
     <div className="space-y-6">
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Tổng số thuốc', value: '12,450', change: '+2.5%', icon: Pill, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Nhóm thuốc', value: '48', change: '+1', icon: Layers, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Tổng số thuốc', value: totalMedicines.toString(), change: 'Thực tế', icon: Pill, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Nhóm thuốc', value: totalCategories.toString(), change: 'Thực tế', icon: Layers, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Lượt tra cứu', value: '8,290', change: '+12%', icon: Search, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Người dùng', value: '156', change: '0%', icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((stat, i) => (
@@ -118,9 +134,9 @@ export default function Dashboard() {
 
         {/* Category Distribution */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <h3 className="font-bold text-slate-800 mb-6">Phân bổ theo nhóm</h3>
+          <h3 className="font-bold text-slate-800 mb-6">Phân bổ theo nhóm (Thực tế)</h3>
           <div className="space-y-4">
-            {categoryData.map((cat, i) => (
+            {categoryDistribution.map((cat, i) => (
               <div key={i} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">{cat.name}</span>
@@ -129,7 +145,7 @@ export default function Dashboard() {
                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${(cat.count / 150) * 100}%` }}
+                    animate={{ width: `${(cat.count / maxCategoryCount) * 100}%` }}
                     transition={{ duration: 1, delay: i * 0.1 }}
                     className="h-full rounded-full"
                     style={{ backgroundColor: cat.color }}
@@ -144,13 +160,61 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-bottom border-slate-50 flex items-center justify-between">
-          <h3 className="font-bold text-slate-800">Hoạt động gần đây</h3>
-          <button className="text-sm text-blue-600 hover:underline">Xem nhật ký hệ thống</button>
+      {/* Advanced Settings & Recent Activity Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Advanced Settings */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-slate-400" />
+              Cài đặt chuyên sâu
+            </h3>
+          </div>
+          <div className="p-6 space-y-6 flex-1">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Cảnh báo tồn kho thấp</h4>
+                  <p className="text-xs text-slate-500">Ngưỡng số lượng tối thiểu để cảnh báo</p>
+                </div>
+                <input type="number" defaultValue={50} className="w-20 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Cảnh báo thuốc sắp hết hạn</h4>
+                  <p className="text-xs text-slate-500">Số tháng trước khi hết hạn</p>
+                </div>
+                <input type="number" defaultValue={6} className="w-20 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Tự động đồng bộ CSDL Quốc gia</h4>
+                  <p className="text-xs text-slate-500">Cập nhật dữ liệu định kỳ hàng ngày</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t border-slate-100">
+              <button className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors">
+                Lưu cài đặt
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="divide-y divide-slate-50">
+
+        {/* Recent Activity */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+            <h3 className="font-bold text-slate-800">Hoạt động gần đây</h3>
+            <button className="text-sm text-blue-600 hover:underline">Xem nhật ký hệ thống</button>
+          </div>
+          <div className="divide-y divide-slate-50 flex-1 overflow-y-auto max-h-[300px]">
           {recentLogs.map((log) => (
             <div key={log.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
@@ -164,6 +228,7 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

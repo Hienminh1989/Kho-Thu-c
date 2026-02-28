@@ -13,7 +13,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Kho Thuốc | Hệ thống quản lý dược phẩm',
+  title: 'Tra cứu Thuốc Bệnh Viện Thiệu Hóa',
   description: 'Hệ thống quản lý danh mục thuốc nội bộ',
 };
 

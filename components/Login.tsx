@@ -50,8 +50,8 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center shadow-xl shadow-blue-200 mb-4">
               <Pill className="text-white w-8 h-8" />
             </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Kho Thuốc</h1>
-            <p className="text-slate-500 text-sm font-medium mt-1">Hệ thống quản lý dược phẩm nội bộ</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight text-center">Tra cứu Thuốc<br/>Bệnh Viện Thiệu Hóa</h1>
+            <p className="text-slate-500 text-sm font-medium mt-2 text-center">Hệ thống quản lý dược phẩm nội bộ</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

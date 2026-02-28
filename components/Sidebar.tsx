@@ -41,7 +41,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           <Stethoscope className="text-white w-6 h-6" />
         </div>
         <div>
-          <h1 className="font-bold text-slate-900 leading-tight">Medicat Pro</h1>
+          <h1 className="font-bold text-slate-900 leading-tight">Tra cứu Thuốc<br/>Bệnh Viện Thiệu Hóa</h1>
           <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Hospital System</p>
         </div>
       </div>

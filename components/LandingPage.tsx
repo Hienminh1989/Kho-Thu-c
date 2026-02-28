@@ -113,7 +113,7 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20 transition-transform group-hover:scale-105">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">Kho Thuốc</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Tra cứu Thuốc BV Thiệu Hóa</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
@@ -696,7 +696,7 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
                 <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <span className="text-2xl font-bold text-white">Kho Thuốc</span>
+                <span className="text-xl font-bold text-white">Tra cứu Thuốc BV Thiệu Hóa</span>
               </div>
               <p className="text-sm leading-relaxed max-w-sm">
                 Nền tảng quản lý dược phẩm hiện đại, đồng hành cùng bác sĩ và dược sĩ trong việc cung cấp thông tin y tế chính xác, an toàn.
@@ -720,7 +720,7 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-            <p>© 2024 Kho Thuốc. All rights reserved.</p>
+            <p>© 2024 Bệnh Viện Thiệu Hóa. All rights reserved.</p>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
               <span>Hệ thống hoạt động bình thường</span>
