@@ -8,6 +8,7 @@ import {
   Stethoscope, ShieldCheck, Activity, Loader2, Database, Building2, Globe
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { initialMedicines, initialCategories } from '@/lib/data';
 import AIChat from './AIChat';
 
@@ -28,6 +29,20 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
   const [isSearchingNational, setIsSearchingNational] = useState(false);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
   const [hasSearchedNational, setHasSearchedNational] = useState(false);
+  const [clientIp, setClientIp] = useState<string>('');
+
+  useEffect(() => {
+    const fetchIp = async () => {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        setClientIp(data.ip);
+      } catch (error) {
+        console.error('Error fetching IP:', error);
+      }
+    };
+    fetchIp();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -713,14 +728,22 @@ export default function LandingPage({ onGoToLogin }: LandingPageProps) {
             <div>
               <h4 className="text-white font-bold mb-6">Pháp lý</h4>
               <ul className="space-y-3 text-sm">
-                {['Điều khoản', 'Bảo mật', 'Giấy phép', 'Liên hệ'].map(item => (
-                  <li key={item}><a href="#" className="hover:text-blue-400 transition-colors">{item}</a></li>
+                {[
+                  { name: 'Điều khoản', href: '/terms' },
+                  { name: 'Bảo mật', href: '/privacy' },
+                  { name: 'Giấy phép', href: '/license' },
+                  { name: 'Liên hệ', href: '/contact' }
+                ].map(item => (
+                  <li key={item.name}><Link href={item.href} className="hover:text-blue-400 transition-colors">{item.name}</Link></li>
                 ))}
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-            <p>© 2024 Bệnh Viện Thiệu Hóa. All rights reserved.</p>
+            <div className="flex flex-col gap-1 text-center md:text-left">
+              <p>© {new Date().getFullYear()} Bản quyền thuộc về Nguyễn Bá Nam _ Tổ CNTT _ bệnh viện đa khoa Thiệu Hóa.</p>
+              {clientIp && <p className="text-slate-500">IP đang truy cập: {clientIp}</p>}
+            </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
               <span>Hệ thống hoạt động bình thường</span>
